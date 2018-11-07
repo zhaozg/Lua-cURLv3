@@ -240,7 +240,9 @@ int lcurl_util_push_cb(lua_State *L, lcurl_callback_t *c){
 }
 
 int lcurl_util_new_weak_table(lua_State*L, const char *mode){
+#ifdef _DEBUG
   int top = lua_gettop(L);
+#endif
   lua_newtable(L);
   lua_newtable(L);
   lua_pushstring(L, mode);

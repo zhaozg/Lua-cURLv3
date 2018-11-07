@@ -19,7 +19,7 @@
  * when parent mime is freed or when remove this part from parent. There no way reuse same mime.
  * Its not clear is it possible use mime created by one easy handle when do preform in another.
  * `m=e1:mime() e2:setopt_httpmime(m) e1:close() e2:perform()`
- * 
+ *
  * // Attach child to root (root also can have parent)
  * curl_mime_subparts(root, child);
  *
@@ -166,7 +166,9 @@ static const char *lcurl_mime_part_fields[] = {
 };
 
 static int lcurl_mime_part_assing_table(lua_State *L, int part, int t){
+#ifdef _DEBUG
   int top = lua_gettop(L);
+#endif
   const char *method; int i;
 
   part = lua_absindex(L, part);
@@ -183,7 +185,7 @@ static int lcurl_mime_part_assing_table(lua_State *L, int part, int t){
     assert(top == lua_gettop(L));
   }
   else{
-    for(i=0;method = lcurl_mime_part_fields[i]; ++i){
+    for(i=0; (method = lcurl_mime_part_fields[i]) != NULL; ++i){
       lua_getfield(L, t, method);
       if(!lua_isnil(L, -1)){
         int ret = lcurl_mime_part_assign(L, part, method);
@@ -220,6 +222,7 @@ static lcurl_mime_part_t* lcurl_mime_parts_append(lcurl_mime_t *m, lcurl_mime_pa
   return p;
 }
 
+#if 0
 static lcurl_mime_part_t* lcurl_mime_parts_find(lcurl_mime_t *m, lcurl_mime_part_t *p){
   lcurl_mime_part_t *ptr;
 
@@ -229,6 +232,7 @@ static lcurl_mime_part_t* lcurl_mime_parts_find(lcurl_mime_t *m, lcurl_mime_part
 
   return NULL;
 }
+#endif
 
 int lcurl_mime_create(lua_State *L, int error_mode){
   //! @todo make this function as method of easy handle
@@ -639,7 +643,6 @@ static const struct luaL_Reg lcurl_mime_part_methods[] = {
   {"filename",             lcurl_mime_part_filename                  },
   {"type",                 lcurl_mime_part_type                      },
   {"encoder",              lcurl_mime_part_encoder                   },
-  
 
   {"free",                 lcurl_mime_part_free                      },
   {"__gc",                 lcurl_mime_part_free                      },
