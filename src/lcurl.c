@@ -19,11 +19,7 @@
 #include "lcutils.h"
 
 /*export*/
-#ifdef _WIN32
-#  define LCURL_EXPORT_API __declspec(dllexport)
-#else
-#  define LCURL_EXPORT_API LUALIB_API
-#endif
+#define LCURL_EXPORT_API LUALIB_API
 
 static const char* LCURL_REGISTRY = "LCURL Registry";
 static const char* LCURL_USERVAL = "LCURL Uservalues";

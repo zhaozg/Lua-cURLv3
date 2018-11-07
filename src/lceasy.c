@@ -200,6 +200,7 @@ static int lcurl_easy_cleanup_storage(lua_State *L, lcurl_easy_t *p){
   for(i = 0; i < LCURL_LIST_COUNT; ++i){
     p->lists[i] = LUA_NOREF;
   }
+  return 0;
 }
 
 static int lcurl_easy_cleanup(lua_State *L){
@@ -1509,7 +1510,7 @@ static int lcurl_xferinfo_callback(void *arg, curl_off_t dltotal, curl_off_t dln
       #if LCURL_CURL_VER_GE(7,68,0)
         if(ret != (size_t)CURL_PROGRESSFUNC_CONTINUE)
       #endif
-        if(ret == 0) ret = 1; else ret = 0;
+        ret = ret == 0 ? 1 : 0;
     }
   }
 

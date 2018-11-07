@@ -7,8 +7,17 @@ DESTDIR          ?= /
 PKG_CONFIG       ?= pkg-config
 INSTALL          ?= install
 RM               ?= rm
-LUA_IMPL         ?= lua
+LUA_IMPL         ?= luajit
 CC               ?= $(MAC_ENV) gcc
+
+ifneq (,$(TARGET_SYS))
+UNAME := $(TARGET_SYS)
+endif
+
+LIB_OPTION      ?= -shared
+CC              := $(CROSS)$(CC)
+AR              := $(CROSS)$(AR)
+LD              := $(CROSS)$(LD)
 
 LUA_VERSION       = $(shell $(PKG_CONFIG) --print-provides --silence-errors $(LUA_IMPL))
 ifeq ($(LUA_VERSION),)
@@ -23,15 +32,28 @@ LUA_LMOD         ?= $(shell $(PKG_CONFIG) --variable INSTALL_LMOD $(LUA_IMPL))
 LIBDIR           ?= $(shell $(PKG_CONFIG) --variable libdir $(LUA_IMPL))
 LUA_INC          ?= $(shell $(PKG_CONFIG) --variable includedir $(LUA_IMPL))
 LUA_LIBS          = $(shell $(PKG_CONFIG) --libs $(LUA_IMPL))
+CURL_CFLAGS       = $(shell $(PKG_CONFIG) --cflags libcurl)
 CURL_LIBS         = $(shell $(PKG_CONFIG) --libs libcurl)
 endif
 
+LIBS              = $(CURL_LIBS)
 ifeq ($(UNAME), Linux)
 OS_FLAGS         ?= -shared
+LIBS              = -lrt -ldl $(CURL_LIBS)
 endif
 ifeq ($(UNAME), Darwin)
-OS_FLAGS         ?= -bundle -undefined dynamic_lookup
+OS_FLAGS         ?= -undefined dynamic_lookup
 MAC_ENV          ?= env MACOSX_DEPLOYMENT_TARGET='10.3'
+LIBS              = -ldl $(CURL_LIBS)
+endif
+ifeq ($(UNAME), iOS)
+OS_FLAGS         ?= -undefined dynamic_lookup $(TARGET_FLAGS)
+MAC_ENV          ?= env MACOSX_DEPLOYMENT_TARGET='10.3'
+LIBS              = -ldl $(CURL_LIBS) $(TARGET_FLAGS)
+endif
+ifeq ($(findstring MINGW, $(UNAME)), MINGW)
+CURL_LIBS         = $(shell $(PKG_CONFIG) --static --libs libcurl)
+LIBS              = $(LUA_LIBS) $(CURL_LIBS)
 endif
 
 ifneq ($(DEBUG),)
@@ -44,9 +66,8 @@ else
 WARN              = -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic
 endif
 
-INCLUDES          = -I$(LUA_INC)
+INCLUDES          = -I$(LUA_INC) $(CURL_CFLAGS)
 DEFINES           =
-LIBS              = $(CURL_LIBS)
 
 COMMONFLAGS       = -O2 -g -pipe -fPIC $(OS_FLAGS) $(DBG)
 LF                = $(LIBS) $(LDFLAGS)
@@ -59,13 +80,18 @@ OBJS              = $(subst src/,,$(subst .c,.o,$(SRCS)))
 BIN               = $(T).so
 STATIC_LIB        = $(T).a
 
-all: $(BIN)
+all: $(BIN) lib$T.a
 
-$(BIN): $(SRCS)
-	$(CC) $(CF) -o $@ $^ $(LF)
+$(BIN): $(OBJS)
+	$(CC) -shared $(CF) -o $@ $^ $(LF)
+.c.o:
+	$(CC) $(CF) -c -o $@ $?
+
+lib$T.a: $(OBJS)
+	$(AR) rcs $@ $^
 
 $(OBJS): $(SRCS)
-	$(CC) $(CF) -c $^ $(LF)
+	$(CC) $(CF) -c $^
 
 $(STATIC_LIB): $(OBJS)
 	ar rcs $@ $^

@@ -14,7 +14,7 @@
 #include <string.h> /* for memset */
 #include <assert.h>
 
-#if LUA_VERSION_NUM >= 502 
+#if LUA_VERSION_NUM >= 502
 
 int luaL_typerror (lua_State *L, int narg, const char *tname) {
   const char *msg = lua_pushfstring(L, "%s expected, got %s", tname,
@@ -31,8 +31,9 @@ void luaL_register (lua_State *L, const char *libname, const luaL_Reg *l){
 
 #endif
 
-#else 
+#else
 
+#if !defined(luaL_newlib)
 void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup){
   luaL_checkstack(L, nup, "too many upvalues");
   for (; l->name != NULL; l++) {  /* fill the table with given functions */
@@ -44,6 +45,7 @@ void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup){
   }
   lua_pop(L, nup);  /* remove upvalues */
 }
+#endif
 
 void lua_rawgetp(lua_State *L, int index, const void *p){
   index = lua_absindex(L, index);
@@ -68,11 +70,11 @@ int lutil_newmetatablep (lua_State *L, const void *p) {
 
   lua_newtable(L);  /* create metatable */
   lua_pushvalue(L, -1); /* duplicate metatable to set*/
-  
-  lua_pushliteral (L, "__type"); 
+
+  lua_pushliteral (L, "__type");
   lua_pushstring(L, p); // push meta name
   lua_settable (L, -3); // set meta name
-  
+
   lua_rawsetp(L, LUA_REGISTRYINDEX, p);
 
   return 1;

@@ -240,13 +240,17 @@ int lcurl_util_push_cb(lua_State *L, lcurl_callback_t *c){
 }
 
 int lcurl_util_new_weak_table(lua_State*L, const char *mode){
+#ifdef _DEBUG
   int top = lua_gettop(L);
+#endif
   lua_newtable(L);
   lua_newtable(L);
   lua_pushstring(L, mode);
   lua_setfield(L, -2, "__mode");
   lua_setmetatable(L,-2);
+#ifdef _DEBUG
   assert((top+1) == lua_gettop(L));
+#endif
   return 1;
 }
 
@@ -355,7 +359,7 @@ void lcurl_stack_dump (lua_State *L){
 
 curl_socket_t lcurl_opt_os_socket(lua_State *L, int idx, curl_socket_t def) {
   if (lua_islightuserdata(L, idx))
-    return (curl_socket_t)lua_touserdata(L, idx);
+    return (curl_socket_t)(intptr_t)lua_touserdata(L, idx);
 
   return (curl_socket_t)lutil_optint64(L, idx, def);
 }
