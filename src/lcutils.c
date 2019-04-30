@@ -248,7 +248,9 @@ int lcurl_util_new_weak_table(lua_State*L, const char *mode){
   lua_pushstring(L, mode);
   lua_setfield(L, -2, "__mode");
   lua_setmetatable(L,-2);
+#ifdef _DEBUG
   assert((top+1) == lua_gettop(L));
+#endif
   return 1;
 }
 

@@ -182,7 +182,9 @@ static int lcurl_mime_part_assing_table(lua_State *L, int part, int t){
 
     lua_pop(L, 1);
 
+#ifdef _DEBUG
     assert(top == lua_gettop(L));
+#endif
   }
   else{
     for(i=0; (method = lcurl_mime_part_fields[i]) != NULL; ++i){
@@ -193,10 +195,14 @@ static int lcurl_mime_part_assing_table(lua_State *L, int part, int t){
       }
       lua_pop(L, 1);
 
+#ifdef _DEBUG
       assert(top == lua_gettop(L));
+#endif
     }
 
+#ifdef _DEBUG
     lua_getfield(L, t, "subparts");
+#endif
     if(!lua_isnil(L, -1)){
       if(IS_FALSE(L, -1) || lcurl_getmime_at(L, -1)){
         int ret = lcurl_mime_part_assign(L, part, "subparts");
@@ -204,7 +210,9 @@ static int lcurl_mime_part_assing_table(lua_State *L, int part, int t){
       }
     }
     lua_pop(L, 1);
+#ifdef _DEBUG
     assert(top == lua_gettop(L));
+#endif
   }
 
   return 0;
