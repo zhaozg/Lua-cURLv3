@@ -73,6 +73,7 @@ int lcurl_easy_create(lua_State *L, int error_mode){
   p = lutil_newudatap(L, lcurl_easy_t, LCURL_EASY);
 
   p->curl = curl_easy_init();
+  curl_easy_setopt(p->curl, CURLOPT_NOSIGNAL, 1L);
 
   p->err_mode    = error_mode;
   if(!p->curl) return lcurl_fail_ex(L, p->err_mode, LCURL_ERROR_EASY, CURLE_FAILED_INIT);
