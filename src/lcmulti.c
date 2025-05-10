@@ -150,7 +150,7 @@ static int lcurl_multi_add_handle(lua_State *L){
   lua_State *curL;
 
   if(e->multi){
-    return lcurl_fail_ex(L, p->err_mode, LCURL_ERROR_MULTI, 
+    return lcurl_fail_ex(L, p->err_mode, LCURL_ERROR_MULTI,
 #if LCURL_CURL_VER_GE(7,32,1)
     CURLM_ADDED_ALREADY
 #else
@@ -161,8 +161,8 @@ static int lcurl_multi_add_handle(lua_State *L){
 
   // From doc:
   //   If you have CURLMOPT_TIMERFUNCTION set in the multi handle,
-  //   that callback will be called from within this function to ask 
-  //   for an updated timer so that your main event loop will get 
+  //   that callback will be called from within this function to ask
+  //   for an updated timer so that your main event loop will get
   //   the activity on this handle to get started.
   //
   // So we should add easy before this call
@@ -234,7 +234,7 @@ CURLMcode lcurl__multi_remove_handle(lua_State *L, lcurl_multi_t *p, lcurl_easy_
     lua_rawsetp(L, -2, e->curl);
     lua_pop(L, 1);
   }
- 
+
   return code;
 }
 
@@ -320,9 +320,9 @@ static int lcurl_multi_wait(lua_State *L){
   }
 
   if(ms < 0){
-    /* if libcurl returns a -1 timeout here, it just means that libcurl 
+    /* if libcurl returns a -1 timeout here, it just means that libcurl
        currently has no stored timeout value. You must not wait too long
-       (more than a few seconds perhaps) before you call 
+       (more than a few seconds perhaps) before you call
        curl_multi_perform() again.
      */
     ms = 1000;
@@ -411,7 +411,7 @@ static int lcurl_opt_set_long_(lua_State *L, int opt){
     luaL_argcheck(L, lua_type(L, 2) == LUA_TNUMBER, 2, "number or boolean expected");
     val = luaL_checklong(L, 2);
   }
-  
+
   code = curl_multi_setopt(p->curl, opt, val);
   if(code != CURLM_OK){
     return lcurl_fail_ex(L, p->err_mode, LCURL_ERROR_MULTI, code);
@@ -480,7 +480,7 @@ static int lcurl_opt_set_string_array_(lua_State *L, int opt){
 
 //{ CallBack
 
-static int lcurl_multi_set_callback(lua_State *L, 
+static int lcurl_multi_set_callback(lua_State *L,
   lcurl_multi_t *p, lcurl_callback_t *c,
   int OPT_CB, int OPT_UD,
   const char *method, void *func
@@ -509,7 +509,7 @@ int lcurl_multi_timer_callback(CURLM *multi, long ms, void *arg){
   lua_pushnumber(L, ms);
   if(lua_pcall(L, n, LUA_MULTRET, 0)){
     assert(lua_gettop(L) >= top);
-    lua_settop(L, top); //! @todo 
+    lua_settop(L, top); //! @todo
     // lua_pushlightuserdata(L, (void*)LCURL_ERROR_TAG);
     // lua_insert(L, top+1);
     return -1;
@@ -520,7 +520,7 @@ int lcurl_multi_timer_callback(CURLM *multi, long ms, void *arg){
       lua_settop(L, top);
       return -1;
     }
-    
+
     if(lua_isboolean(L, top + 1))
       ret = lua_toboolean(L, top + 1)?0:-1;
     else ret = lua_tointeger(L, top + 1);
@@ -567,6 +567,7 @@ static int lcurl_multi_socket_callback(CURL *easy, curl_socket_t s, int what, vo
   }
 
   lua_settop(L, top);
+  (void)e;
   return 0;
 }
 
@@ -585,7 +586,7 @@ static int lcurl_multi_set_SOCKETFUNCTION(lua_State *L){
 static int lcurl_multi_setopt(lua_State *L){
   lcurl_multi_t *p = lcurl_getmulti(L);
   int opt;
-  
+
   luaL_checkany(L, 2);
 
   if(lua_type(L, 2) == LUA_TTABLE){

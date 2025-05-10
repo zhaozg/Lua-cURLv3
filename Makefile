@@ -42,14 +42,13 @@ OS_FLAGS         ?= -shared
 LIBS              = -lrt -ldl $(CURL_LIBS)
 endif
 ifeq ($(UNAME), Darwin)
-OS_FLAGS         ?= -undefined dynamic_lookup
 MAC_ENV          ?= env MACOSX_DEPLOYMENT_TARGET='10.3'
-LIBS              = -ldl $(CURL_LIBS)
+LIBS              = -undefined dynamic_lookup -ldl $(CURL_LIBS)
 endif
 ifeq ($(UNAME), iOS)
-OS_FLAGS         ?= -undefined dynamic_lookup $(TARGET_FLAGS)
+OS_FLAGS         ?= $(TARGET_FLAGS)
 MAC_ENV          ?= env MACOSX_DEPLOYMENT_TARGET='10.3'
-LIBS              = -ldl $(CURL_LIBS) $(TARGET_FLAGS)
+LIBS              = -undefined dynamic_lookup -ldl $(CURL_LIBS) $(TARGET_FLAGS)
 endif
 ifeq ($(findstring MINGW, $(UNAME)), MINGW)
 CURL_LIBS         = $(shell $(PKG_CONFIG) --static --libs libcurl)
